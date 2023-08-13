@@ -1,11 +1,13 @@
 import itertools
 import json
 import re
+import warnings
 from pathlib import Path
 
 import networkx as nx
 import numpy as np
 import pandas
+from sklearn.exceptions import UndefinedMetricWarning
 
 
 def to_idx(fname, sent_tok_str):
@@ -53,6 +55,10 @@ def matching_precision_recall_f1(gold_annotations, pred_annotations, classes=Non
             if sum(len(an[k]) for k in classes) == 0:
                 continue
             G.add_node((f, i, 'pred'), obj=an, denominator=sum(map(len, an.values())))
+
+    if all(type_ == 'gold' for _, _, type_ in G.nodes) or all(type_ == 'pred' for _, _, type_ in G.nodes):
+        warnings.warn(f'gold and/or pred is empty for classes {classes}', UndefinedMetricWarning)
+        return 0,0,0
 
     G_precision = G.copy()
     G_recall = G.copy()

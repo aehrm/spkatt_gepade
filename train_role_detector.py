@@ -122,7 +122,7 @@ for epoch in range(num_epochs):
         true_labels.extend(batch['labels'].cpu().reshape(-1, model.config.num_labels).numpy().tolist())
         pred_logits.extend(outputs.logits.cpu().reshape(-1, model.config.num_labels).numpy().tolist())
 
-    score = compute_metrics(true_labels, pred_logits)
+    score = compute_metrics(true_labels, pred_logits, target_names=SPKATT_GEPADE_LABELS)
     if score > best_f1_score:
         best_f1_score = score
         best_model_state_dict = copy.deepcopy(model.state_dict())

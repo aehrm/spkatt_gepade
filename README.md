@@ -38,14 +38,25 @@ place them into the `models/` folder, or train the models yourself (see below).
 
 After the `models/` folder has been populated, you can run the full inference (1a) like this:
 ```sh
+# e.g, download GePaBERT models
+(cd models; wget https://github.com/aehrm/spkatt_gepade/releases/download/konvens/gepabert_models.tar; tar xf gepabert_models.tar;)
+
+
 # adjust if needed
 #export PEFT_MODEL_DIR=./models
 
 poetry run python ./predict.sh 1a input_dir [output_dir]
 ```
-
-The `input_dir` should hold tokenized speeches as JSON file, like in the [GePaDe test dataset](https://github.com/umanlp/SpkAtt-2023/tree/master/data/eval/task1) (the one provided for
+The `input_dir` should hold tokenized speeches as JSON file, like in the [GePaDe test dataset](https://github.com/umanlp/SpkAtt-2023/tree/master/data/eval/task1_test) (the one provided for
 the shared task).
+
+E.g., to reproduce the results, run 
+```
+wget https://github.com/umanlp/SpkAtt-2023/archive/refs/heads/master.zip -O gepade.zip
+unzip gepade.zip
+
+poetry run python ./predict.sh 1a SpkAtt-2023-master/data/dev/task1 [output_dir]
+```
 
 Alternatively, you can run the subtask 1b (role prediction from gold cues) like the following, e.g., on
 the [GePaDe dev dataset](https://github.com/umanlp/SpkAtt-2023/tree/master/data/dev/task1). Make sure the input_dir JSON files contain annotation objects with cue spans.
@@ -63,9 +74,11 @@ After downloading the [full GePaDe dataset](https://github.com/umanlp/SpkAtt-202
 #export TRAIN_FILES='./data/train/task1'
 #export DEV_FILES='./data/dev/task1'
 
-poetry run python ./predict.sh 1a input_dir [output_dir]
+poetry run python ./train_cue_detector.py
+poetry run python ./train_cue_joiner.py
+poetry run python ./train_role_detector.py
 ```
 
 [gepabert-release]: https://github.com/aehrm/spkatt_gepade/releases/download/konvens/gepabert_models.tar
-[gbertlargt-release]: https://github.com/aehrm/spkatt_gepade/releases/download/konvens/gbertbase_models.tar
-[gbertbast-release]: https://github.com/aehrm/spkatt_gepade/releases/download/konvens/gbertlarge_models.tar
+[gbertlarge-release]: https://github.com/aehrm/spkatt_gepade/releases/download/konvens/gbertbase_models.tar
+[gbertbase-release]: https://github.com/aehrm/spkatt_gepade/releases/download/konvens/gbertlarge_models.tar
