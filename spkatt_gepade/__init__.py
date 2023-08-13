@@ -1,0 +1,1 @@
+SPKATT_GEPADE_LABELS = ['Topic', 'Source', 'Evidence', 'Addr', 'Message', 'Cue', 'Medium', 'PTC']

@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "spkatt-gepade"
+version = "0.1.0"
+description = ""
+authors = ["Anton Ehrmanntraut <anton.ehrmanntraut@uni-wuerzburg.de>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "spkatt_gepade"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pandas = "^2.0.3"
+tqdm = "^4.66.1"
+transformers = ">=4.30"
+networkx = ">=3.1"
+more-itertools = ">=9.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
