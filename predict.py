@@ -16,7 +16,7 @@ from spkatt_gepade.bert_for_multi_label_token_classification import BertForMulti
 from spkatt_gepade.common import matching_precision_recall_f1
 from spkatt_gepade.input_tokenizers import get_cue_sequence, get_cue_link_sequence, gen_role_sequence
 
-MODEL_PATH = os.getenv('MODEL_OUTPUT_DIR', './models')
+PEFT_MODEL_DIR = os.getenv('PEFT_MODEL_DIR', './models')
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -31,7 +31,7 @@ def load_input(list_of_paths):
 
 
 def predict_cue_words(sentence_dict):
-    peft_name = str(Path(MODEL_PATH) / 'cue_model_peft')
+    peft_name = str(Path(PEFT_MODEL_DIR) / 'cue_model_peft')
     peft_config = PeftConfig.from_pretrained(peft_name)
     tokenizer = BertTokenizerFast.from_pretrained(peft_config.base_model_name_or_path)
     collator = DataCollatorForTokenClassification(tokenizer=tokenizer, label_pad_token_id=-100, padding=True)
@@ -70,7 +70,7 @@ def predict_cue_words(sentence_dict):
 
 
 def predict_cue_links(sentence_dict, positive_coords):
-    peft_name = str(Path(MODEL_PATH) / 'cue_joiner_peft')
+    peft_name = str(Path(PEFT_MODEL_DIR) / 'cue_joiner_peft')
     peft_config = PeftConfig.from_pretrained(peft_name)
 
     tokenizer = BertTokenizerFast.from_pretrained(peft_config.base_model_name_or_path)
@@ -128,7 +128,7 @@ def predict_roles(sentence_dict, prediction_dict):
 
             new_prediction_dict[fname].append(new_obj)
 
-    peft_name = str(Path(MODEL_PATH) / 'role_model_peft')
+    peft_name = str(Path(PEFT_MODEL_DIR) / 'role_model_peft')
     peft_config = PeftConfig.from_pretrained(peft_name)
 
     tokenizer = BertTokenizerFast.from_pretrained(peft_config.base_model_name_or_path)

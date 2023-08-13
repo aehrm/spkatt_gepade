@@ -34,7 +34,7 @@ def compute_metrics(true_labels, predictions_logits, **kwargs):
 BASE_MODEL_NAME = os.getenv('BASE_MODEL_NAME', 'aehrm/gepabert')
 TRAIN_FILES = os.getenv('TRAIN_FILES', './data/train/task1')
 DEV_FILES = os.getenv('DEV_FILES', './data/dev/task1')
-MODEL_OUTPUT_DIR = str(Path(os.getenv('MODEL_OUTPUT_DIR', 'models')) / 'cue_joiner_peft')
+MODEL_OUTPUT_DIR = str(Path(os.getenv('PEFT_MODEL_DIR', 'models')) / 'cue_joiner_peft')
 
 tokenizer = BertTokenizerFast.from_pretrained(BASE_MODEL_NAME)
 tokenizer.add_special_tokens({'additional_special_tokens': ['[LABEL]']})
