@@ -67,6 +67,6 @@ After downloading the [full GePaDe dataset](https://github.com/umanlp/SpkAtt-202
 poetry run python ./predict.sh 1a input_dir [output_dir]
 ```
 
-[gepabert-model]: 
-[gbertlarge-model]:
-[gbertbase-model]:
+[gepabert-release]: https://github.com/aehrm/spkatt_gepade/releases/download/konvens/gepabert_models.tar
+[gbertlargt-release]: https://github.com/aehrm/spkatt_gepade/releases/download/konvens/gbertbase_models.tar
+[gbertbast-release]: https://github.com/aehrm/spkatt_gepade/releases/download/konvens/gbertlarge_models.tar
