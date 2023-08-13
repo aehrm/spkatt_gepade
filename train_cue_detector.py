@@ -31,12 +31,12 @@ def compute_metrics(true_labels, predictions_logits, **kwargs):
     return f1_score(y_pred=pred_labels, y_true=true_labels, average='binary')
 
 
-model_name = os.getenv('MODEL_PATH', 'aehrm/gepabert')
+BASE_MODEL_NAME = os.getenv('BASE_MODEL_NAME', 'aehrm/gepabert')
 TRAIN_FILES = os.getenv('TRAIN_FILES', './data/train/task1')
 DEV_FILES = os.getenv('DEV_FILES', './data/dev/task1')
 MODEL_OUTPUT_DIR = str(Path(os.getenv('MODEL_OUTPUT_DIR', 'models')) / 'cue_model_peft')
 
-tokenizer = BertTokenizerFast.from_pretrained(model_name)
+tokenizer = BertTokenizerFast.from_pretrained(BASE_MODEL_NAME)
 collator = DataCollatorForTokenClassification(tokenizer=tokenizer, label_pad_token_id=-100, padding=True)
 
 input_seqs_train, input_seqs_dev = [], []
@@ -56,10 +56,7 @@ for fname in tqdm(list(Path(DEV_FILES).glob('*.json'))):
 
 print('loading model')
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-base_model = BertForTokenClassification.from_pretrained(model_name,
-                                                        num_labels=2, id2label={0: 'O', 1: 'CUE'},
-                                                        label2id={'O': 0, 'CUE': 1}
-                                                        ).to(device)
+base_model = BertForTokenClassification.from_pretrained(BASE_MODEL_NAME, num_labels=2).to(device)
 lora_config = LoraConfig(task_type=TaskType.TOKEN_CLS, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1)
 model = get_peft_model(base_model, lora_config)
 model.print_trainable_parameters()

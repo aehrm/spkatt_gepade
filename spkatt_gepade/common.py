@@ -13,7 +13,7 @@ def to_idx(fname, sent_tok_str):
     return fname, int(x[0]), int(x[1])
 
 
-def make_sentence_dataframe(sentence_objects, fname=None):
+def make_sentence_dataframe(sentence_objects, fname=''):
     df = []
 
     for sent in sentence_objects:

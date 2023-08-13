@@ -45,12 +45,12 @@ num_labels = len(SPKATT_GEPADE_LABELS)
 label2id = {v:k for k, v in enumerate(SPKATT_GEPADE_LABELS)}
 id2label = {k:v for k, v in enumerate(SPKATT_GEPADE_LABELS)}
 
-model_name = os.getenv('MODEL_PATH', 'aehrm/gepabert')
+BASE_MODEL_NAME = os.getenv('BASE_MODEL_NAME', 'aehrm/gepabert')
 TRAIN_FILES = os.getenv('TRAIN_FILES', './data/train/task1')
 DEV_FILES = os.getenv('DEV_FILES', './data/dev/task1')
 MODEL_OUTPUT_DIR = str(Path(os.getenv('MODEL_OUTPUT_DIR', 'models')) / 'role_model_peft')
 
-tokenizer = BertTokenizerFast.from_pretrained(model_name)
+tokenizer = BertTokenizerFast.from_pretrained(BASE_MODEL_NAME)
 tokenizer.add_special_tokens({'additional_special_tokens': ['[LABEL]']})
 collator = DataCollatorForTokenClassification(tokenizer=tokenizer, label_pad_token_id=[-100] * num_labels, padding=True)
 
@@ -60,20 +60,20 @@ for fname in tqdm(list(Path(TRAIN_FILES).glob('*.json'))):
     obj = json.load(open(fname))
     input_seqs_train.extend(
         gen_role_sequence(tokenizer, sentence_objects=obj['Sentences'], annotation_objects=obj['Annotations'],
-                              add_labels=True, id2label=id2label))
+                              add_labels=True, label_array=SPKATT_GEPADE_LABELS))
 
 print('preparing input sequences: dev')
 for fname in tqdm(list(Path(DEV_FILES).glob('*.json'))):
     obj = json.load(open(fname))
     input_seqs_dev.extend(
         gen_role_sequence(tokenizer, sentence_objects=obj['Sentences'], annotation_objects=obj['Annotations'],
-                              add_labels=True, id2label=id2label))
+                              add_labels=True, label_array=SPKATT_GEPADE_LABELS))
 
 #%%
 
 print('loading model')
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-base_model = BertForMultiLabelTokenClassification.from_pretrained(model_name, num_labels=num_labels).to(device)
+base_model = BertForMultiLabelTokenClassification.from_pretrained(BASE_MODEL_NAME, num_labels=num_labels).to(device)
 base_model.resize_token_embeddings(len(tokenizer))
 
 lora_config = LoraConfig(task_type=TaskType.TOKEN_CLS, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1)
@@ -99,7 +99,7 @@ batch_size = 4
 gradient_accum = 1
 lr = 5e-5
 
-optimizer = AdamW(model.parameters(), lr=5e-5, eps=1e-8)
+optimizer = AdamW(model.parameters(), lr=lr, eps=1e-8)
 scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=3, verbose=True)
 
 train_loader = DataLoader(input_seqs_train, collate_fn=collator, batch_size=batch_size, shuffle=True)
