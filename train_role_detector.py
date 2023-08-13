@@ -1,29 +1,17 @@
-#%%
-import collections
 import copy
 import json
 import os
-import sys
 from pathlib import Path
 
 import numpy as np
 import torch
 from peft import LoraConfig, TaskType, get_peft_model
-from torch.nn import BCEWithLogitsLoss
+from sklearn.metrics import classification_report, f1_score
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from transformers import BertTokenizerFast, DataCollatorForTokenClassification, BertForTokenClassification, \
-    BertPreTrainedModel, BertModel
-import pandas
-import more_itertools
-import re
-import itertools
-from sklearn.metrics import classification_report, f1_score
-
-from transformers.modeling_outputs import TokenClassifierOutput
-from common import make_dataframe
+from transformers import BertTokenizerFast, DataCollatorForTokenClassification
 
 from spkatt_gepade import SPKATT_GEPADE_LABELS
 from spkatt_gepade.bert_for_multi_label_token_classification import BertForMultiLabelTokenClassification
@@ -42,8 +30,8 @@ def compute_metrics(true_labels, predictions_logits, **kwargs):
 
 
 num_labels = len(SPKATT_GEPADE_LABELS)
-label2id = {v:k for k, v in enumerate(SPKATT_GEPADE_LABELS)}
-id2label = {k:v for k, v in enumerate(SPKATT_GEPADE_LABELS)}
+label2id = {v: k for k, v in enumerate(SPKATT_GEPADE_LABELS)}
+id2label = {k: v for k, v in enumerate(SPKATT_GEPADE_LABELS)}
 
 BASE_MODEL_NAME = os.getenv('BASE_MODEL_NAME', 'aehrm/gepabert')
 TRAIN_FILES = os.getenv('TRAIN_FILES', './data/train/task1')
@@ -60,16 +48,15 @@ for fname in tqdm(list(Path(TRAIN_FILES).glob('*.json'))):
     obj = json.load(open(fname))
     input_seqs_train.extend(
         gen_role_sequence(tokenizer, sentence_objects=obj['Sentences'], annotation_objects=obj['Annotations'],
-                              add_labels=True, label_array=SPKATT_GEPADE_LABELS))
+                          add_labels=True, label_array=SPKATT_GEPADE_LABELS))
 
 print('preparing input sequences: dev')
 for fname in tqdm(list(Path(DEV_FILES).glob('*.json'))):
     obj = json.load(open(fname))
     input_seqs_dev.extend(
         gen_role_sequence(tokenizer, sentence_objects=obj['Sentences'], annotation_objects=obj['Annotations'],
-                              add_labels=True, label_array=SPKATT_GEPADE_LABELS))
+                          add_labels=True, label_array=SPKATT_GEPADE_LABELS))
 
-#%%
 
 print('loading model')
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -90,8 +77,6 @@ for n, p in model.named_parameters():
         p.requires_grad = False
 
 model.print_trainable_parameters()
-
-
 
 print('starting training')
 num_epochs = 30
@@ -155,7 +140,6 @@ for epoch in range(num_epochs):
         print('adjusted lr, restoring best model')
         if best_model_state_dict is not None:
             model.load_state_dict(best_model_state_dict)
-
 
 print(f'loading model with best score on dev: {best_f1_score}, saving to {MODEL_OUTPUT_DIR}')
 model.load_state_dict(best_model_state_dict)

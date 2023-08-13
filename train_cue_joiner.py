@@ -75,7 +75,6 @@ for n, p in model.named_parameters():
 
 model.print_trainable_parameters()
 
-
 print('starting training')
 num_epochs = 30
 batch_size = 4

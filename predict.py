@@ -1,4 +1,3 @@
-import copy
 import json
 import os
 import sys
@@ -6,21 +5,21 @@ from pathlib import Path
 
 import more_itertools
 import networkx as nx
-import pandas
 import torch
-from peft import LoraConfig, TaskType, get_peft_model, PeftModel, PeftConfig
+from peft import PeftModel, PeftConfig
 from tqdm import tqdm
 from transformers import BertTokenizerFast, DataCollatorForTokenClassification, BertForTokenClassification, \
     BertForSequenceClassification
 
-from spkatt_gepade.bert_for_multi_label_token_classification import BertForMultiLabelTokenClassification
-from spkatt_gepade.common import make_sentence_dataframe, matching_precision_recall_f1
-from spkatt_gepade.input_tokenizers import get_cue_sequence, get_cue_link_sequence, gen_role_sequence
 from spkatt_gepade import SPKATT_GEPADE_LABELS
+from spkatt_gepade.bert_for_multi_label_token_classification import BertForMultiLabelTokenClassification
+from spkatt_gepade.common import matching_precision_recall_f1
+from spkatt_gepade.input_tokenizers import get_cue_sequence, get_cue_link_sequence, gen_role_sequence
 
 MODEL_PATH = os.getenv('MODEL_OUTPUT_DIR', './models')
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 
 def load_input(list_of_paths):
     input_json = {}
@@ -41,7 +40,8 @@ def predict_cue_words(sentence_dict):
     for fname, obj in tqdm(sentence_dict.items(), desc='cue detection: tokenize'):
         input_seqs.extend(get_cue_sequence(tokenizer, sentence_objects=obj, fname=fname, return_coords=True))
 
-    base_model = BertForTokenClassification.from_pretrained(peft_config.base_model_name_or_path, num_labels=2).to(device)
+    base_model = BertForTokenClassification.from_pretrained(peft_config.base_model_name_or_path, num_labels=2).to(
+        device)
     model = PeftModel.from_pretrained(base_model, peft_name).eval()
 
     positive_coords = []
@@ -80,9 +80,12 @@ def predict_cue_links(sentence_dict, positive_coords):
     input_seqs = []
     for fname, obj in tqdm(sentence_dict.items(), desc='cue links: tokenize'):
         positive_coords_in_f = [x for x in positive_coords if x[0] == fname]
-        input_seqs.extend(get_cue_link_sequence(tokenizer, sentence_objects=obj, positive_cues=positive_coords_in_f, fname=fname, return_coords=True))
+        input_seqs.extend(
+            get_cue_link_sequence(tokenizer, sentence_objects=obj, positive_cues=positive_coords_in_f, fname=fname,
+                                  return_coords=True))
 
-    base_model = BertForSequenceClassification.from_pretrained(peft_config.base_model_name_or_path, num_labels=2).to(device)
+    base_model = BertForSequenceClassification.from_pretrained(peft_config.base_model_name_or_path, num_labels=2).to(
+        device)
     base_model.resize_token_embeddings(len(tokenizer))
     model = PeftModel.from_pretrained(base_model, peft_name).eval()
 
@@ -134,9 +137,12 @@ def predict_roles(sentence_dict, prediction_dict):
 
     input_seqs = []
     for fname in tqdm(sentence_dict.keys(), desc='role detection: tokenize'):
-        input_seqs.extend(gen_role_sequence(tokenizer, sentence_objects=sentence_dict[fname], annotation_objects=new_prediction_dict[fname], fname=fname, return_coords=True))
+        input_seqs.extend(gen_role_sequence(tokenizer, sentence_objects=sentence_dict[fname],
+                                            annotation_objects=new_prediction_dict[fname], fname=fname,
+                                            return_coords=True))
 
-    base_model = BertForMultiLabelTokenClassification.from_pretrained(peft_config.base_model_name_or_path, num_labels=len(SPKATT_GEPADE_LABELS)).to(device)
+    base_model = BertForMultiLabelTokenClassification.from_pretrained(peft_config.base_model_name_or_path,
+                                                                      num_labels=len(SPKATT_GEPADE_LABELS)).to(device)
     base_model.resize_token_embeddings(len(tokenizer))
     model = PeftModel.from_pretrained(base_model, peft_name).eval()
 
@@ -198,11 +204,11 @@ if __name__ == '__main__':
             pr, rec, f1 = matching_precision_recall_f1(gold_annotations, full_prediction_dict, classes=[label_])
             print(f'{label_:10}     {pr:.4f}    {rec:.4f}     {f1:.4f}')
 
-        pr, rec, f1 = matching_precision_recall_f1(gold_annotations, full_prediction_dict, classes=set(SPKATT_GEPADE_LABELS) - {'Cue'})
+        pr, rec, f1 = matching_precision_recall_f1(gold_annotations, full_prediction_dict,
+                                                   classes=set(SPKATT_GEPADE_LABELS) - {'Cue'})
         print(f'{"Roles":10}     {pr:.4f}    {rec:.4f}     {f1:.4f}')
         pr, rec, f1 = matching_precision_recall_f1(gold_annotations, full_prediction_dict)
         print(f'{"Overall":10}     {pr:.4f}    {rec:.4f}     {f1:.4f}')
-
 
     if output_dir is not None:
         print('writing predictions to ', str(output_dir))
