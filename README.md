@@ -39,7 +39,6 @@ place them into the `models/` folder, or train the models yourself (see below).
 After the `models/` folder has been populated, you can run the full inference (1a) like this:
 ```sh
 # adjust if needed
-#export BASE_MODEL_NAME=aehrm/gepabert
 #export MODEL_OUTPUT_DIR=./models
 
 poetry run python ./predict.sh 1a input_dir [output_dir]

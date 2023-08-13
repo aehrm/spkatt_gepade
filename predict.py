@@ -8,7 +8,7 @@ import more_itertools
 import networkx as nx
 import pandas
 import torch
-from peft import LoraConfig, TaskType, get_peft_model, PeftModel
+from peft import LoraConfig, TaskType, get_peft_model, PeftModel, PeftConfig
 from tqdm import tqdm
 from transformers import BertTokenizerFast, DataCollatorForTokenClassification, BertForTokenClassification, \
     BertForSequenceClassification
@@ -18,7 +18,6 @@ from spkatt_gepade.common import make_sentence_dataframe, matching_precision_rec
 from spkatt_gepade.input_tokenizers import get_cue_sequence, get_cue_link_sequence, gen_role_sequence
 from spkatt_gepade import SPKATT_GEPADE_LABELS
 
-BASE_MODEL_NAME = os.getenv('BASE_MODEL_NAME', 'aehrm/gepabert')
 MODEL_PATH = os.getenv('MODEL_OUTPUT_DIR', './models')
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -33,15 +32,17 @@ def load_input(list_of_paths):
 
 
 def predict_cue_words(sentence_dict):
-    tokenizer = BertTokenizerFast.from_pretrained(BASE_MODEL_NAME)
+    peft_name = str(Path(MODEL_PATH) / 'cue_model_peft')
+    peft_config = PeftConfig.from_pretrained(peft_name)
+    tokenizer = BertTokenizerFast.from_pretrained(peft_config.base_model_name_or_path)
     collator = DataCollatorForTokenClassification(tokenizer=tokenizer, label_pad_token_id=-100, padding=True)
 
     input_seqs = []
     for fname, obj in tqdm(sentence_dict.items(), desc='cue detection: tokenize'):
         input_seqs.extend(get_cue_sequence(tokenizer, sentence_objects=obj, fname=fname, return_coords=True))
 
-    base_model = BertForTokenClassification.from_pretrained(BASE_MODEL_NAME, num_labels=2).to(device)
-    model = PeftModel.from_pretrained(base_model, str(Path(MODEL_PATH) / 'cue_model_peft')).eval()
+    base_model = BertForTokenClassification.from_pretrained(peft_config.base_model_name_or_path, num_labels=2).to(device)
+    model = PeftModel.from_pretrained(base_model, peft_name).eval()
 
     positive_coords = []
     with tqdm(desc='cue detection: predict', total=len(input_seqs)) as pbar:
@@ -69,7 +70,10 @@ def predict_cue_words(sentence_dict):
 
 
 def predict_cue_links(sentence_dict, positive_coords):
-    tokenizer = BertTokenizerFast.from_pretrained(BASE_MODEL_NAME)
+    peft_name = str(Path(MODEL_PATH) / 'cue_joiner_peft')
+    peft_config = PeftConfig.from_pretrained(peft_name)
+
+    tokenizer = BertTokenizerFast.from_pretrained(peft_config.base_model_name_or_path)
     tokenizer.add_special_tokens({'additional_special_tokens': ['[LABEL]']})
     collator = DataCollatorForTokenClassification(tokenizer=tokenizer, label_pad_token_id=-100, padding=True)
 
@@ -78,9 +82,9 @@ def predict_cue_links(sentence_dict, positive_coords):
         positive_coords_in_f = [x for x in positive_coords if x[0] == fname]
         input_seqs.extend(get_cue_link_sequence(tokenizer, sentence_objects=obj, positive_cues=positive_coords_in_f, fname=fname, return_coords=True))
 
-    base_model = BertForSequenceClassification.from_pretrained(BASE_MODEL_NAME, num_labels=2).to(device)
+    base_model = BertForSequenceClassification.from_pretrained(peft_config.base_model_name_or_path, num_labels=2).to(device)
     base_model.resize_token_embeddings(len(tokenizer))
-    model = PeftModel.from_pretrained(base_model, str(Path(MODEL_PATH) / 'cue_joiner_peft')).eval()
+    model = PeftModel.from_pretrained(base_model, peft_name).eval()
 
     G = nx.Graph()
     G.add_nodes_from(positive_coords)
@@ -121,7 +125,10 @@ def predict_roles(sentence_dict, prediction_dict):
 
             new_prediction_dict[fname].append(new_obj)
 
-    tokenizer = BertTokenizerFast.from_pretrained(BASE_MODEL_NAME)
+    peft_name = str(Path(MODEL_PATH) / 'role_model_peft')
+    peft_config = PeftConfig.from_pretrained(peft_name)
+
+    tokenizer = BertTokenizerFast.from_pretrained(peft_config.base_model_name_or_path)
     tokenizer.add_special_tokens({'additional_special_tokens': ['[LABEL]']})
     collator = DataCollatorForTokenClassification(tokenizer=tokenizer, label_pad_token_id=-100, padding=True)
 
@@ -129,9 +136,9 @@ def predict_roles(sentence_dict, prediction_dict):
     for fname in tqdm(sentence_dict.keys(), desc='role detection: tokenize'):
         input_seqs.extend(gen_role_sequence(tokenizer, sentence_objects=sentence_dict[fname], annotation_objects=new_prediction_dict[fname], fname=fname, return_coords=True))
 
-    base_model = BertForMultiLabelTokenClassification.from_pretrained(BASE_MODEL_NAME, num_labels=len(SPKATT_GEPADE_LABELS)).to(device)
+    base_model = BertForMultiLabelTokenClassification.from_pretrained(peft_config.base_model_name_or_path, num_labels=len(SPKATT_GEPADE_LABELS)).to(device)
     base_model.resize_token_embeddings(len(tokenizer))
-    model = PeftModel.from_pretrained(base_model, str(Path(MODEL_PATH) / 'role_model_peft')).eval()
+    model = PeftModel.from_pretrained(base_model, peft_name).eval()
 
     with tqdm(desc='role detection: predict', total=len(input_seqs)) as pbar:
         for batch in more_itertools.chunked(input_seqs, 16):
