@@ -20,7 +20,6 @@ from spkatt_gepade import SPKATT_GEPADE_LABELS
 
 BASE_MODEL_NAME = os.getenv('BASE_MODEL_NAME', 'aehrm/gepabert')
 MODEL_PATH = os.getenv('MODEL_OUTPUT_DIR', './models')
-OUTPUT_PATH = os.getenv('OUTPUT_DIR', './output')
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -172,21 +171,21 @@ if __name__ == '__main__':
     if len(sys.argv) >= 4:
         output_dir = Path(sys.argv[3])
 
-    input = load_input(list(input_dir.glob('*.json')))
-    input_sentences = {f: obj['Sentences'] for f, obj in input.items()}
+    input_dict = load_input(list(input_dir.glob('*.json')))
+    input_sentences = {f: obj['Sentences'] for f, obj in input_dict.items()}
 
     if task_type == '1a':
         predicted_cue_words = predict_cue_words(input_sentences)
         cue_prediction_dict = predict_cue_links(input_sentences, predicted_cue_words)
     elif task_type == '1b':
         cue_prediction_dict = {}
-        for f, obj in input.items():
+        for f, obj in input_dict.items():
             cue_prediction_dict[f] = [{'Cue': an['Cue']} for an in obj['Annotations']]
 
     full_prediction_dict = predict_roles(input_sentences, cue_prediction_dict)
 
-    if sum(len(obj['Annotations']) if 'Annotations' in obj.keys() else 0 for obj in input.values()) > 0:
-        gold_annotations = {f: obj['Annotations'] for f, obj in input.items()}
+    if sum(len(obj['Annotations']) if 'Annotations' in obj.keys() else 0 for obj in input_dict.values()) > 0:
+        gold_annotations = {f: obj['Annotations'] for f, obj in input_dict.items()}
         print('            precision    recall   f1-score')
         for label_ in SPKATT_GEPADE_LABELS:
             pr, rec, f1 = matching_precision_recall_f1(gold_annotations, full_prediction_dict, classes=[label_])
