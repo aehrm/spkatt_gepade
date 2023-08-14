@@ -44,7 +44,6 @@ def gen_role_sequence(tokenizer, sentence_objects, annotation_objects, add_label
         segment_labels = pandas.DataFrame(index=segment.index)
         for k in anno.keys():
             segment_labels[k] = np.array([f'{sentid}:{tokid}' in anno[k] for _, sentid, tokid in segment.index])
-        segment_labels = segment_labels.astype(int)
 
 
         out_words = []
@@ -73,13 +72,15 @@ def gen_role_sequence(tokenizer, sentence_objects, annotation_objects, add_label
                     token_coord_subwords.append(segment.index[word_idx])
 
         if add_labels:
+            coded_label_array = segment_labels[label_array].astype(int)
+
             out_labels_subwords = []
             for word_idx in get_word_id_from_input_seq(input_seq):
                 if word_idx is None:  # i.e. subword is either special token or ##-token
                     out_labels_subwords.append([-100] * len(label_array))
                 else:
                     word_coordinate = segment.index[word_idx]
-                    multi_label_arr = segment_labels.loc[word_coordinate].values
+                    multi_label_arr = coded_label_array.loc[word_coordinate].values
                     out_labels_subwords.append(multi_label_arr)
 
             input_seq['labels'] = np.array(out_labels_subwords, dtype=int)

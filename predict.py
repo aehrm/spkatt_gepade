@@ -34,7 +34,7 @@ def predict_cue_words(sentence_dict):
     peft_name = str(Path(PEFT_MODEL_DIR) / 'cue_model_peft')
     peft_config = PeftConfig.from_pretrained(peft_name)
     tokenizer = BertTokenizerFast.from_pretrained(peft_config.base_model_name_or_path)
-    collator = DataCollatorForTokenClassification(tokenizer=tokenizer, label_pad_token_id=-100, padding=True)
+    collator = DataCollatorForTokenClassification(tokenizer=tokenizer, padding=True)
 
     input_seqs = []
     for fname, obj in tqdm(sentence_dict.items(), desc='cue detection: tokenize'):
@@ -75,7 +75,7 @@ def predict_cue_links(sentence_dict, positive_coords):
 
     tokenizer = BertTokenizerFast.from_pretrained(peft_config.base_model_name_or_path)
     tokenizer.add_special_tokens({'additional_special_tokens': ['[LABEL]']})
-    collator = DataCollatorForTokenClassification(tokenizer=tokenizer, label_pad_token_id=-100, padding=True)
+    collator = DataCollatorForTokenClassification(tokenizer=tokenizer, padding=True)
 
     input_seqs = []
     for fname, obj in tqdm(sentence_dict.items(), desc='cue links: tokenize'):
@@ -133,7 +133,7 @@ def predict_roles(sentence_dict, prediction_dict):
 
     tokenizer = BertTokenizerFast.from_pretrained(peft_config.base_model_name_or_path)
     tokenizer.add_special_tokens({'additional_special_tokens': ['[LABEL]']})
-    collator = DataCollatorForTokenClassification(tokenizer=tokenizer, label_pad_token_id=-100, padding=True)
+    collator = DataCollatorForTokenClassification(tokenizer=tokenizer, padding=True)
 
     input_seqs = []
     for fname in tqdm(sentence_dict.keys(), desc='role detection: tokenize'):
