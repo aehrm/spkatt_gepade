@@ -79,6 +79,6 @@ poetry run python ./train_cue_joiner.py
 poetry run python ./train_role_detector.py
 ```
 
-[gepabert-release]: https://github.com/aehrm/spkatt_gepade/releases/download/konvens/gepabert_models.tar
-[gbertlarge-release]: https://github.com/aehrm/spkatt_gepade/releases/download/konvens/gbertbase_models.tar
-[gbertbase-release]: https://github.com/aehrm/spkatt_gepade/releases/download/konvens/gbertlarge_models.tar
+[gepabert-release]: https://github.com/aehrm/spkatt_gepade/releases/download/konvens/gepabert_peft_models.tar
+[gbertlarge-release]: https://github.com/aehrm/spkatt_gepade/releases/download/konvens/gbertbase_peft_models.tar
+[gbertbase-release]: https://github.com/aehrm/spkatt_gepade/releases/download/konvens/gbertlarge_peft_models.tar
