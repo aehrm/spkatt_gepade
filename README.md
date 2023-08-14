@@ -4,13 +4,14 @@ This repository holds the code for the submission “Politics, BERTed: Automatic
 Attribution of Speech Events in German Parliamentary Debates” submitted to the
 [KONVENS 2023 Shared Task on Speaker Attribution](https://github.com/umanlp/SpkAtt-2023), Task 1.
 
+The goal of the shared task is the automatic identification of speech events in
+political debates  and attributing them to their respective speakers,
+essentially identifying who says what to whom in the parliamentary debates.
+
 The task is divided into two subtasks:
 * Task 1a is the full task, predicting both cue spans and associated role spans
 * Task 1b is the role prediction task only, where gold cue spans are already given.
 
-The goal of the shared task is the automatic identification of speech events in
-political debates  and attributing them to their respective speakers,
-essentially identifying who says what to whom in the parliamentary debates.
 
 ## Models
 
