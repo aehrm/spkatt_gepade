@@ -4,6 +4,8 @@ This repository holds the code for the submission “Politics, BERTed: Automatic
 Attribution of Speech Events in German Parliamentary Debates” submitted to the
 [KONVENS 2023 Shared Task on Speaker Attribution](https://github.com/umanlp/SpkAtt-2023), Task 1.
 
+The accompanying paper can be found here: [PDF](https://raw.githubusercontent.com/aehrm/spkatt_gepade/main/paper.pdf) ([Full Proceeedings](https://github.com/umanlp/SpkAtt-2023/blob/master/doc/SpkAtt2023-proceedings.pdf)).
+
 The goal of the shared task is the automatic identification of speech events in
 political debates  and attributing them to their respective speakers,
 essentially identifying who says what to whom in the parliamentary debates.
@@ -11,6 +13,25 @@ essentially identifying who says what to whom in the parliamentary debates.
 The task is divided into two subtasks:
 * Task 1a is the full task, predicting both cue spans and associated role spans
 * Task 1b is the role prediction task only, where gold cue spans are already given.
+
+
+## Citing
+
+If you are using the software and/or models, please consider citing the accompanying publication:
+
+> Ehrmanntraut, Anton. 2023. “Politics, BERTed: Automatic Attribution of Speech Events in German Parliamentary Debates.” In <i>Proceedings of the GermEval 2023 Shared Task on Speaker Attribution in Newswire and Parliamentary Debates (SpkAtt-2023)</i>, edited by Ines Rehbein, Fynn Petersen-Frey, Annelen Brunner, Josef Ruppenhofer, Chris Biemann, and Simone Paolo Ponzetto, 22–30. Ingolstadt, Germany.
+
+```bibtex
+@inproceedings{ehrmanntraut_politics_2023,
+	location = {Ingolstadt, Germany},
+	title = {Politics, {BERTed}: Automatic Attribution of Speech Events in German Parliamentary Debates},
+	pages = {22--30},
+	booktitle = {Proceedings of the {GermEval} 2023 Shared Task on Speaker Attribution in Newswire and Parliamentary Debates ({SpkAtt}-2023)},
+	author = {Ehrmanntraut, Anton},
+	editor = {Rehbein, Ines and Petersen-Frey, Fynn and Brunner, Annelen and Ruppenhofer, Josef and Biemann, Chris and Ponzetto, Simone Paolo},
+	date = {2023-09-18}
+}
+```
 
 
 ## Models
