@@ -1,0 +1,37 @@
+ff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Ehrmanntraut"
+  given-names: "Anton"
+  orcid: "https://orcid.org/0000-0001-6677-586X"
+title: "Speaker Attribution in German Parliamentary Debates through BERT models"
+date-released: 2023-08-14
+repository-code: "https://github.com/aehrm/spkatt_gepade"
+preferred-citation:
+  type: 
+  authors:
+  - family-names: "Ehrmanntraut"
+    given-names: "Anton"
+    orcid: "https://orcid.org/0000-0001-6677-586X"
+  title: "Politics, BERTed: Automatic Attribution of Speech Events in German Parliamentary Debates"
+  date: 2023-09-19
+  type: conference-paper
+  collection-title: "Proceedings of the GermEval 2023 Shared Task on Speaker Attribution in Newswire and Parliamentary Debates (SpkAtt-2023)"
+  collection-type: proceedings
+  editors:
+  - family-names: "Rehbein"
+    given-names: "Ines"
+  - family-names: "Petersen-Frey"
+    given-names: "Fynn"
+  - family-names: "Brunner"
+    given-names: "Annelen"
+  - family-names: "Ruppenhofer"
+    given-names: "Josef"
+  - family-names: "Biemann"
+    given-names: "Chris"
+  - family-names: "Ponzetto"
+    given-names: "Simone Paolo"
+  start: 22
+  end: 33
+  url: "https://github.com/umanlp/SpkAtt-2023/blob/master/doc/SpkAtt2023-proceedings.pdf"
+
